@@ -25,6 +25,7 @@ export default class Sparta {
 			socket.on("disconnect", () => {
 				this.players.delete(player.socket.id);
 			});
+			this.createRoom(player);
 		});
 		let port;
 		if (
@@ -36,8 +37,9 @@ export default class Sparta {
 		this.server.listen(port);
 		console.log(`Listening on port ${port}`);
 	}
-	createRoom(name: string, player: Player, initialState?: string) {
-		this.rooms.set(name, new Room(this, initialState));
-		player.join(name);
+	createRoom(player: Player, initialState?: string) {
+		let newRoom = new Room(this, initialState);
+		this.rooms.set(newRoom.id, newRoom);
+		player.join(newRoom.id);
 	}
 }

@@ -1,6 +1,6 @@
 import EventEmitter from "eventemitter3";
 import { Move } from "hika";
-import { Server, Socket } from "socket.io";
+import { Socket } from "socket.io";
 import Room from "./room";
 import Sparta from "./sparta";
 
@@ -37,11 +37,14 @@ export default class Player extends EventEmitter {
 			}
 		});
 		this.on("create", data => {
-			this.sparta.createRoom(data.room, this);
+			this.sparta.createRoom(this, data.initialState || undefined);
 		});
 	}
 	join(room: string) {
-		this.socket.join(room);
+		if (this.sparta.rooms.has(room)) {
+			this.socket.join(room);
+			this.send("state", this.sparta.rooms.get(room)!.serializedState);
+		}
 	}
 	leave(room: string) {
 		this.socket.leave(room);

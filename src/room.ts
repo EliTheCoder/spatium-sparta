@@ -3,6 +3,20 @@ import { Server } from "socket.io";
 import { nanoid } from "nanoid";
 import Sparta from "./sparta";
 
+type GameState = {
+	id: string;
+	game: Game;
+	turn: number;
+	moveHistory: Move[];
+	initialState: string;
+};
+type SerializedGameState = {
+	id: string;
+	turn: number;
+	moveHistory: string[];
+	initialState: string;
+};
+
 export default class Room {
 	private _id: string;
 	private _game: Game;
@@ -26,9 +40,32 @@ export default class Room {
 	public get id(): string {
 		return this._id;
 	}
-	constructor(private _sparta: Sparta, initialState?: string) {
+	public get initialState(): string {
+		return this._initialState;
+	}
+	public get state(): GameState {
+		return {
+			id: this.id,
+			game: this.game,
+			turn: this.turn,
+			moveHistory: this.moveHistory,
+			initialState: this.initialState
+		};
+	}
+	public get serializedState(): SerializedGameState {
+		return {
+			id: this.id,
+			turn: this.turn,
+			moveHistory: this.serializedMoveHistory,
+			initialState: this.initialState
+		};
+	}
+	constructor(
+		private _sparta: Sparta,
+		private _initialState: string = "4,4,2,2 RNBQ,PPPP/KBNR,PPPP|,,pppp,rnbq/,,pppp,kbnr"
+	) {
 		this._id = nanoid(12);
-		this._game = new Game(initialState || undefined);
+		this._game = new Game(this.initialState || undefined);
 	}
 	move(mov: Move) {
 		const result = this.game.moveIfValid(mov);
